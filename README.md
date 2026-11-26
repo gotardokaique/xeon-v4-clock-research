@@ -1,0 +1,98 @@
+# Xeon v4 Clock Research
+
+![Status](https://img.shields.io/badge/status-research-yellow)
+![Platform](https://img.shields.io/badge/platform-Intel%20Broadwell--EP-blue)
+![Chipset](https://img.shields.io/badge/chipset-C612-blue)
+
+Pesquisa independente de engenharia reversa para identificar, implementar e validar um método reproduzível de alteração de clock em processadores Intel Xeon E5 v4 (Broadwell-EP), especialmente modelos com multiplicador bloqueado.
+
+> **Fase atual: levantamento de requisitos e estudos técnicos (R&D).** O projeto ainda não disponibiliza uma solução funcional de overclock, firmware modificado ou ferramenta de gravação.
+
+## Objetivo
+
+Investigar mecanismos de controle do Base Clock (BCLK), firmware UEFI e Intel Server Platform Services (SPS), buscando aumentar a frequência efetiva da CPU acima do turbo all-core original. O foco inicial é o Xeon E5-2680 v4 na QIYIDA X99-H9S V1.21. A compatibilidade com outros modelos será avaliada posteriormente, com evidências específicas de cada plataforma.
+
+## Plataforma de referência
+
+| Componente | Configuração |
+|---|---|
+| CPU | Intel Xeon E5-2680 v4 — 14 núcleos / 28 threads |
+| Placa-mãe | QIYIDA X99-H9S V1.21 |
+| Chipset | Intel C612 (PCI LPC `8086:8d44`) |
+| Firmware | AMI UEFI / Intel SPS 03.01.03.072 (Grantley) |
+| BCLK nominal | 100 MHz |
+| Turbo all-core observado | ~2,90 GHz (29x) |
+| Ambiente | Ubuntu / Linux |
+
+### Metas experimentais
+
+| BCLK | All-core teórico (29x) | Ganho nominal |
+|---:|---:|---:|
+| 100 MHz | 2,900 GHz | Baseline |
+| 101 MHz | 2,929 GHz | +1% |
+| 103 MHz | 2,987 GHz | +3% |
+| 105 MHz | 3,045 GHz | +5% |
+| 110 MHz | 3,190 GHz | +10% |
+
+As frequências acima são projeções matemáticas, não resultados alcançados. Alterações nos demais domínios de clock são aceitáveis para a pesquisa; o isolamento de PCIe/DMI não é requisito obrigatório. A integridade de dados e a estabilidade devem, contudo, ser verificadas experimentalmente.
+
+## Estado da investigação
+
+- [x] Caracterização da plataforma e baseline de frequência.
+- [x] Backup SPI consistente e identificação das partições SPS.
+- [x] Extração e análise inicial de módulos UEFI e ICC.
+- [x] Teste do OC Mailbox: solicitação de ratio 30x rejeitada.
+- [x] Investigação HECI/MEI: dispositivo exposto, inicialização HBM malsucedida.
+- [x] Comparação de versões alternativas do OcInit.
+- [ ] Interpretar os dados persistentes do ICC no SPS 3.1.
+- [ ] Identificar ferramenta ou método compatível de análise dos perfis.
+- [ ] Confirmar topologia do clock e a atuação do MOD3 sobre o BCLK.
+- [ ] Projetar um analisador offline com validação estrutural.
+- [ ] Produzir e validar um candidato experimental.
+- [ ] Demonstrar aumento real do BCLK, estabilidade e recuperação.
+
+## Linhas de pesquisa
+
+| Linha | Prioridade | Situação |
+|---|---|---|
+| Perfis ICC persistentes no SPS original | Principal | Estrutura binária ainda não decodificada |
+| Gerador de clock e moduladores | Alta | Topologia física pendente |
+| HECI e protocolo ICC | Complementar | Comunicação não validada |
+| OcInit e BCLK Strap | Complementar | Restrições e pré-condições em estudo |
+| Alteração de multiplicador via OC Mailbox | Baixa | Ratio testado foi rejeitado |
+
+## Documentação
+
+A investigação acumulada, os resultados positivos e negativos, os endereços e offsets, os hashes, as referências e o plano operacional estão em:
+
+**[Engenharia reversa do BCLK — Xeon E5-2680 v4 / QIYIDA X99-H9S](docs/xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md)**
+
+O documento é preservado integralmente como baseline de pesquisa de 26/11/2026. Consulte a seção 17 para o plano de ação e a seção 18 para retomar a investigação sem repetir testes.
+
+```text
+xeon-v4-clock-research/
+├── README.md
+├── .gitignore
+└── docs/
+    └── xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md
+```
+
+## Roadmap
+
+1. **Levantamento de requisitos e estudos — fase atual:** consolidar evidências, reunir dados persistentes do SPS, investigar a compatibilidade das ferramentas e documentar hipóteses.
+2. **Engenharia reversa:** interpretar as estruturas de configuração do ICC e estabelecer o vínculo com os domínios físicos de clock.
+3. **Prototipagem offline:** desenvolver um analisador reproduzível e validar formatos e diferenças binárias antes de qualquer alteração física.
+4. **Validação experimental:** testar uma alteração isolada de frequência em ambiente recuperável, medir desempenho, estabilidade e integridade de dados.
+5. **Documentação e expansão:** registrar o procedimento efetivamente validado e avaliar outras placas e CPUs Xeon v4.
+
+## Critérios de validação
+
+Uma solução não será considerada funcional apenas por exibir opções ocultas na BIOS, aceitar uma solicitação de ratio ou responder a um comando. Será necessário demonstrar frequência efetiva acima do baseline, desempenho reproduzível sob carga equivalente e ausência de erros nos testes executados. Os resultados devem identificar a revisão da placa, firmware, CPU e condições experimentais.
+
+## Contribuições e evidências
+
+Relatos devem distinguir resultados medidos, observações de engenharia reversa, documentação pública e hipóteses. Registre versões, hashes e logs relevantes, removendo identificadores sensíveis antes de compartilhá-los. Não inclua dumps integrais de firmware, binários proprietários, dados de configuração específicos de uma máquina ou credenciais no repositório.
+
+## Aviso técnico
+
+Projeto experimental, não afiliado à Intel nem à QIYIDA. Alterações no firmware e em clocks compartilhados podem impedir o POST ou corromper dados. Experimentos de escrita exigem meios de recuperação e acesso físico. Nenhuma licença de redistribuição de firmware de terceiros é presumida; uma licença para código próprio será definida quando houver implementação.
