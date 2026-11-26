@@ -7,7 +7,7 @@
 
 A rejeição de um mecanismo convencional não demonstra que todas as alternativas sejam impossíveis. Investigar separadamente as restrições do silício, microcode, BIOS, SPS e gerador físico de clock. Investigar inclusive diferenças mínimas, callbacks, opções ocultas, estruturas persistentes e variantes de inicialização, mas distinguir pistas de evidências comprovadas.
 
-**Objetivo:** demonstrar controle real do BCLK no E5-2680 v4, mesmo que a primeira alteração observável seja de apenas 0,25 MHz; posteriormente superar os 100 MHz nominais mantendo o ratio all-core original, se suportado. A alteração de clocks compartilhados é aceitável como hipótese experimental. A integridade de dados e a recuperação continuam requisitos.
+**Objetivo:** investigar dois mecanismos complementares para elevar a frequência efetiva do E5-2680 v4: (A) controle do BCLK, mesmo que a primeira alteração observável seja de apenas 0,25 MHz, e (B) desbloqueio efetivo do multiplicador e dos limites turbo all-core do próprio processador. O ratio 29x é o baseline, não uma restrição de projeto. Se ambos os mecanismos forem demonstrados, investigar sua combinação. A alteração de clocks compartilhados é aceitável como hipótese experimental. A integridade de dados e a recuperação continuam requisitos.
 
 **Contexto técnico anterior:** [documento consolidado](../xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md), [comandos e resultados](09-caderno-comandos-resultados.md), [mapa de funções](10-mapa-funcoes-estruturas.md). Os resultados históricos abaixo não constituem novos testes. Referências externas são pistas recuperadas da última análise, não uma nova auditoria independente de todos os links.
 
@@ -67,8 +67,8 @@ Diagrama conceitual de dependências, não uma sequência de boot observada. Top
 
 | Camada | Questão |
 |---|---|
-| Silício CPU | O bloqueio de ratio também impede uma mudança de referência física? |
-| Microcode/PCU | Existem capacidades ou pré-condições alternativas? |
+| Silício CPU | O limite de ratio decorre de fusíveis, lógica interna, microcode, política de inicialização ou combinação dessas camadas? O BCLK pode ser alterado independentemente? |
+| Microcode/PCU | Existem capacidades, diferenças de versão, políticas de turbo ou pré-condições alternativas que permitam elevar o ratio efetivo? |
 | BIOS UEFI | Qual rotina aplica os dados do setup ao hardware? |
 | SPS/ICC | Onde estão os parâmetros, limites e perfis de clock? |
 | Gerador físico | Qual PLL/modulador fornece efetivamente o BCLK do CPU? |
@@ -86,10 +86,10 @@ Não repetir o pedido de ratio 30x nem o mesmo bypass de identificação SPS no 
 | H05 | Gerador externo | Alta | Média | Identificar componente e topologia |
 | H06 | HECI antes de End of POST | Alta | Alta | Identificar cliente/protocolo e fase disponível |
 | H07 | Callbacks IntelSetup | Alta | Alta | Mapear QID, VarStore, callback e consumidor |
-| H08 | PCU Mailbox alternativo | Média | Muito alta | Determinar semântica e pré-condições das rotinas |
+| H08 | PCU Mailbox alternativo e desbloqueio do ratio | Alta | Muito alta | Determinar semântica, domínio, limites e pré-condições das rotinas |
 | H09 | BCLK Strap | Média | Alta | Identificar origem e programação de strap |
-| H10 | Patch seletivo OcInit | Média | Alta | Compreender guards, exceções e caminhos posteriores |
-| H11 | Microcodes anteriores | Baixa | Muito alta | Evidência específica de diferença relevante em 406F1 |
+| H10 | Patch seletivo OcInit/PpmInitialize | Alta | Alta | Distinguir guards de software, exceções e imposição efetiva pelo CPU |
+| H11 | Microcode e limites turbo Broadwell-EP | Alta para estudo offline | Muito alta | Comparar revisões compatíveis e identificar diferença relevante em 406F1 |
 | H12 | Referência física do clock | Último recurso | Muito alta | Esquema, componente, limites e medição elétrica |
 
 Prioridades indicam valor da informação e facilidade relativa de investigação; não são probabilidades de êxito. Nenhuma hipótese deve ser considerada verdadeira apenas porque há um menu, uma instrução ou um registrador associado a clock. Evitar alterações arbitrárias em proteções elétricas e térmicas.
@@ -436,6 +436,35 @@ O tamanho bruto esperado dos quatro arquivos é 397312 bytes (4 KiB + 64 KiB + 6
 
 As frentes 1 e 2 podem ocorrer em paralelo. A frente SSC é a primeira meta experimental mínima, não uma exigência de que todo método de BCLK passe por SSC. Caso uma hipótese falhe, registrar evidência negativa, revisar a causa e prosseguir com a alternativa de maior valor informacional. Os demais ramos H05–H12 permanecem abertos quando houver dados novos que justifiquem a investigação.
 
+### Frente paralela — desbloqueio efetivo do processador
+
+O resultado negativo do comando OC Mailbox 0x11 não encerra a investigação de multiplicador. Ele demonstra somente que a solicitação testada foi rejeitada nas condições observadas. O retorno 0x221 da consulta de capacidades informa RatioOcSupported=0; a solicitação 30x retornou completion 5. Não há prova suficiente para atribuir a restrição exclusivamente a fusíveis físicos, exclusivamente ao microcode ou exclusivamente à BIOS.
+
+| Alvo | Evidência atual | Próxima investigação |
+|---|---|---|
+| MSR 0xCE e 0x194 | bits de capacidade e OC bins zero | comparar significado documentado e comportamento em CPUs Broadwell-EP com capacidades diferentes |
+| MSR 0x1AD/0x1AE/0x1AF | tabelas turbo observadas; 29x all-core | identificar quem carrega as tabelas e onde o CPU impõe o limite |
+| PpmInitialize | guards em 0x2445–0x2454 | reconstruir fluxo de política e distinguir condição de software de rejeição de hardware |
+| OcInit | guard RatioOcSupported em 0x4B8C/0x4B90 | rastrear rotinas de ratio sem presumir que remover o guard desbloqueie o CPU |
+| PlatformCpuPolicy/CpuMpPei/CpuMpDxe | módulos extraídos | mapear estruturas, momento de inicialização e consumidores |
+| OC Mailbox/PCU | MSR 0x150 e caminhos privados distintos | comparar documentação, semântica, domínios e respostas sem repetir escritas rejeitadas |
+| Microcode | BIOS 0x0b000038; Linux 0x0b000040 | inventariar revisões com CPUID e platform mask compatíveis; estudar diferenças offline |
+| Referências de Xeon v3 e modelos v4 | precedentes arquiteturais | verificar diferenças de geração; não presumir compatibilidade de técnicas |
+
+**Sequência de pesquisa:** (1) estabelecer modelo causal da limitação de ratio; (2) comparar inicialização e políticas com processadores/firmwares de referência; (3) identificar divergências verificáveis de código, capacidade ou estado; (4) propor experimento isolado e recuperável somente quando houver hipótese testável; (5) verificar ratio efetivo sob carga equivalente.
+
+Critério mínimo de êxito dessa frente: demonstrar 30x sustentado sob carga dos 14 núcleos a BCLK nominal de 100 MHz, com frequência e desempenho coerentes, sem erros nos testes executados. 31x, 32x e 33x all-core são metas teóricas subsequentes, não capacidades comprovadas. Não confundir turbo de poucos núcleos com desbloqueio all-core. Não confundir remoção de um guard da BIOS com mudança de um fusível físico; nenhum mecanismo de alteração de fusíveis está demonstrado.
+
+| Ratio all-core hipotético | BCLK 100 MHz | BCLK 105 MHz |
+|---:|---:|---:|
+| 29x (baseline de ratio) | 2900 MHz | 3045 MHz |
+| 30x | 3000 MHz | 3150 MHz |
+| 31x | 3100 MHz | 3255 MHz |
+| 32x | 3200 MHz | 3360 MHz |
+| 33x | 3300 MHz | 3465 MHz |
+
+Todos os cenários acima do baseline são projeções, não medições. A investigação de desbloqueio não autoriza desabilitar proteções de corrente, tensão ou temperatura; qualquer experimento persistente depende dos critérios de recuperação já definidos.
+
 ### Backlog imediato
 
 - [ ] Receber e validar pacote sps-icc-research.tar.gz.
@@ -450,12 +479,16 @@ As frentes 1 e 2 podem ocorrer em paralelo. A frente SSC é a primeira meta expe
 - [ ] Preparar baseline de medição e recuperação física.
 - [ ] Demonstrar alteração mínima do gerador de clock.
 - [ ] Demonstrar frequência acima de 100 MHz nominais e ganho efetivo.
+- [ ] Reconstruir o fluxo de carregamento e imposição dos limites turbo em PpmInitialize e políticas CPU.
+- [ ] Comparar microcodes compatíveis e referências de Broadwell-EP, sem downgrade nesta fase.
+- [ ] Identificar uma hipótese de desbloqueio de ratio verificável e demonstrar pelo menos 30x all-core, se viável.
+- [ ] Avaliar combinação de ratio e BCLK somente após validação independente.
 
 ### Regra para retomar
 
 Antes de propor outro teste, consultar este arquivo e as etapas 01–10. Identificar qual hipótese será testada, qual evidência nova é esperada e por que o teste não repete um resultado anterior. Distinguir endereço localizado de função compreendida; função compreendida de comando suportado; comando suportado de alteração física; alteração física de overclock estável.
 
-**Estado final:** fase de estudos e levantamento de requisitos. O caminho prioritário é a configuração persistente ICC do SPS original, com comparação X99 e SSC como frentes complementares. Não existe ainda offset comprovado de frequência, patch de BCLK validado ou firmware pronto para gravação.
+**Estado final:** fase de estudos e levantamento de requisitos. Duas frentes ativas: controle BCLK via ICC/SPS, com comparação X99 e SSC, e investigação de desbloqueio do processador via políticas turbo, PCU, microcode e firmware UEFI. A primeira coleta MFSB/SCA/MFS permanece a próxima ação operacional do ramo ICC, enquanto a análise offline de ratio pode avançar em paralelo. Não existe ainda offset comprovado de frequência, patch de BCLK validado, desbloqueio de ratio demonstrado ou firmware pronto para gravação.
 
 ## Referências complementares
 
