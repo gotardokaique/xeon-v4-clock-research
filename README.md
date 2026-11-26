@@ -63,18 +63,42 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 
 ## Documentação
 
-A investigação acumulada, os resultados positivos e negativos, os endereços e offsets, os hashes, as referências e o plano operacional estão em:
+### Pesquisa consolidada
 
 **[Engenharia reversa do BCLK — Xeon E5-2680 v4 / QIYIDA X99-H9S](docs/xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md)**
 
-O documento é preservado integralmente como baseline de pesquisa de 26/11/2026. Consulte a seção 17 para o plano de ação e a seção 18 para retomar a investigação sem repetir testes.
+O documento principal permanece como referência da investigação de 26/11/2026. As etapas abaixo reorganizam essa base, acrescentam catálogos, fluxos, procedimentos de auditoria e requisitos para continuidade. Não representam novas execuções em hardware.
+
+### Caderno técnico por etapas
+
+| Etapa | Documento |
+|---|---|
+| 01 | [Plataforma, baseline, CPUID, MSRs e OC Mailbox](docs/etapas/01-plataforma-cpu-msr.md) |
+| 02 | [Flash SPI, descriptor, FPT, offsets e recuperação](docs/etapas/02-flash-spi-sps.md) |
+| 03 | [Boot, módulos PEI/DXE, IFR, NVRAM e políticas](docs/etapas/03-boot-uefi-intelsetup.md) |
+| 04 | [PCI, HECI, MMIO, driver MEI e protocolo ICC](docs/etapas/04-heci-pci-mmio.md) |
+| 05 | [ICCMOD, ARC, rotinas, filas, MOD3 e SMBus](docs/etapas/05-iccmod-clock-smbus.md) |
+| 06 | [BIOS alternativas, ferramentas e compatibilidade](docs/etapas/06-comparacao-firmware-ferramentas.md) |
+| 07 | [Requisitos, arquitetura proposta, plano e validação](docs/etapas/07-requisitos-plano-validacao.md) |
+| 08 | [Manifesto de hashes, cronologia e endereçamento](docs/etapas/08-evidencias-cronologia.md) |
+
+**Leitura recomendada:** etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade.
 
 ```text
 xeon-v4-clock-research/
 ├── README.md
 ├── .gitignore
 └── docs/
-    └── xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md
+    ├── xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md
+    └── etapas/
+        ├── 01-plataforma-cpu-msr.md
+        ├── 02-flash-spi-sps.md
+        ├── 03-boot-uefi-intelsetup.md
+        ├── 04-heci-pci-mmio.md
+        ├── 05-iccmod-clock-smbus.md
+        ├── 06-comparacao-firmware-ferramentas.md
+        ├── 07-requisitos-plano-validacao.md
+        └── 08-evidencias-cronologia.md
 ```
 
 ## Roadmap
