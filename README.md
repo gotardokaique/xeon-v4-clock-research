@@ -7,6 +7,8 @@
 Pesquisa independente de engenharia reversa para identificar, implementar e validar um método reproduzível de alteração de clock em processadores Intel Xeon E5 v4 (Broadwell-EP), especialmente modelos com multiplicador bloqueado.
 
 > **Fase atual: levantamento de requisitos e estudos técnicos (R&D).** O projeto ainda não disponibiliza uma solução funcional de overclock, firmware modificado ou ferramenta de gravação.
+>
+> **[ETAPA ATUAL — 11: Investigação ativa de BCLK, SSC, ICC e caminhos alternativos](docs/etapas/11-etapa-atual-investigacao-bclk-icc.md).** Consulte primeiro este documento: ele reúne os 12 tópicos da análise de continuidade e o plano operacional.
 
 ## Objetivo
 
@@ -83,8 +85,9 @@ O documento principal permanece como referência da investigação de 26/11/2026
 | 08 | [Manifesto de hashes, cronologia e endereçamento](docs/etapas/08-evidencias-cronologia.md) |
 | 09 | [Caderno de comandos e resultados brutos](docs/etapas/09-caderno-comandos-resultados.md) |
 | 10 | [Mapa de funções, estruturas e condições de boot](docs/etapas/10-mapa-funcoes-estruturas.md) |
+| **11 — Atual** | [Investigação ativa: BCLK, SSC, ICC e caminhos alternativos](docs/etapas/11-etapa-atual-investigacao-bclk-icc.md) |
 
-**Leitura recomendada:** etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
+**Leitura recomendada:** iniciar pela etapa 11, que contém o contexto e a estratégia atuais. Consultar etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
 
 ```text
 xeon-v4-clock-research/
@@ -102,7 +105,8 @@ xeon-v4-clock-research/
         ├── 07-requisitos-plano-validacao.md
         ├── 08-evidencias-cronologia.md
         ├── 09-caderno-comandos-resultados.md
-        └── 10-mapa-funcoes-estruturas.md
+        ├── 10-mapa-funcoes-estruturas.md
+        └── 11-etapa-atual-investigacao-bclk-icc.md
 ```
 
 ## Roadmap
