@@ -41,8 +41,6 @@ Este arquivo consolida o histórico da investigação, não é uma nova execuç�
 | Microcode | BIOS 0x0b000038, Linux 0x0b000040 |
 | Acesso | Remoto; recuperação física indisponível durante os testes anteriores |
 
-O computador também é usado para compilar AOSP Android 11 (build já concluído). Não confundir o projeto Android com esta investigação de firmware.
-
 ### Frequências teóricas
 
 | BCLK (MHz) | All-core 29x (MHz) | Turbo 33x (MHz) | Variação |
