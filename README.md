@@ -12,7 +12,7 @@ Pesquisa independente de engenharia reversa para identificar, implementar e vali
 
 ## Objetivo
 
-Investigar mecanismos de controle do Base Clock (BCLK), firmware UEFI e Intel Server Platform Services (SPS), buscando aumentar a frequência efetiva da CPU acima do turbo all-core original. O foco inicial é o Xeon E5-2680 v4 na QIYIDA X99-H9S V1.21. A compatibilidade com outros modelos será avaliada posteriormente, com evidências específicas de cada plataforma.
+Investigar mecanismos de controle do Base Clock (BCLK) e de desbloqueio efetivo do multiplicador/limites turbo do próprio processador, por meio de engenharia reversa de firmware UEFI, Intel Server Platform Services (SPS), políticas CPU, PCU e microcode. Ambas as frentes permanecem ativas, buscando aumentar a frequência efetiva da CPU acima do turbo all-core original. O foco inicial é o Xeon E5-2680 v4 na QIYIDA X99-H9S V1.21. A compatibilidade com outros modelos será avaliada posteriormente, com evidências específicas de cada plataforma.
 
 ## Plataforma de referência
 
@@ -52,6 +52,7 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 - [ ] Projetar um analisador offline com validação estrutural.
 - [ ] Produzir e validar um candidato experimental.
 - [ ] Demonstrar aumento real do BCLK, estabilidade e recuperação.
+- [ ] Investigar desbloqueio efetivo de ratio e limites turbo; demonstrar pelo menos 30x all-core a BCLK nominal, se viável.
 
 ## Linhas de pesquisa
 
@@ -61,7 +62,7 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 | Gerador de clock e moduladores | Alta | Topologia física pendente |
 | HECI e protocolo ICC | Complementar | Comunicação não validada |
 | OcInit e BCLK Strap | Complementar | Restrições e pré-condições em estudo |
-| Alteração de multiplicador via OC Mailbox | Baixa | Ratio testado foi rejeitado |
+| Desbloqueio de multiplicador, turbo, PCU e microcode | Alta (estudos offline em paralelo) | Ratio 30x rejeitado pelo mecanismo testado; outras hipóteses permanecem abertas |
 
 ## Documentação
 
