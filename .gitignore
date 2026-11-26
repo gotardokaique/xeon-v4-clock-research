@@ -1,0 +1,31 @@
+# Firmware, dumps and proprietary executables
+*.bin
+*.rom
+*.fd
+*.cap
+*.mod
+*.elf
+*.efi
+*.exe
+*.dll
+*.dump/
+*.tar.gz
+*.zip
+*.7z
+
+# Local research artifacts and potentially sensitive logs
+firmware/
+backups/
+artifacts/
+logs/
+*.log
+.env
+.env.*
+
+# Development environment
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+.idea/
+.DS_Store
