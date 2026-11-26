@@ -81,8 +81,10 @@ O documento principal permanece como referência da investigação de 26/11/2026
 | 06 | [BIOS alternativas, ferramentas e compatibilidade](docs/etapas/06-comparacao-firmware-ferramentas.md) |
 | 07 | [Requisitos, arquitetura proposta, plano e validação](docs/etapas/07-requisitos-plano-validacao.md) |
 | 08 | [Manifesto de hashes, cronologia e endereçamento](docs/etapas/08-evidencias-cronologia.md) |
+| 09 | [Caderno de comandos e resultados brutos](docs/etapas/09-caderno-comandos-resultados.md) |
+| 10 | [Mapa de funções, estruturas e condições de boot](docs/etapas/10-mapa-funcoes-estruturas.md) |
 
-**Leitura recomendada:** etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade.
+**Leitura recomendada:** etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
 
 ```text
 xeon-v4-clock-research/
@@ -98,7 +100,9 @@ xeon-v4-clock-research/
         ├── 05-iccmod-clock-smbus.md
         ├── 06-comparacao-firmware-ferramentas.md
         ├── 07-requisitos-plano-validacao.md
-        └── 08-evidencias-cronologia.md
+        ├── 08-evidencias-cronologia.md
+        ├── 09-caderno-comandos-resultados.md
+        └── 10-mapa-funcoes-estruturas.md
 ```
 
 ## Roadmap
