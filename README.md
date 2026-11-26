@@ -64,6 +64,10 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 | OcInit e BCLK Strap | Complementar | Restrições e pré-condições em estudo |
 | Desbloqueio de multiplicador, turbo, PCU e microcode | Alta (estudos offline em paralelo) | Ratio 30x rejeitado pelo mecanismo testado; outras hipóteses permanecem abertas |
 
+## Agentes de pesquisa (Codex)
+
+O arquivo [AGENTS.md](AGENTS.md), na raiz, reúne as instruções permanentes para agentes: contexto obrigatório, localização dos artefatos, duas frentes de investigação, método de execução, preservação de evidências, limites de operações em hardware e critérios de validação. Abra o clone no VS Code e disponibilize o diretório de pesquisa local conforme as permissões da sessão.
+
 ## Documentação
 
 ### Pesquisa consolidada
@@ -93,6 +97,7 @@ O documento principal permanece como referência da investigação de 26/11/2026
 ```text
 xeon-v4-clock-research/
 ├── README.md
+├── AGENTS.md
 ├── .gitignore
 └── docs/
     ├── xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md
