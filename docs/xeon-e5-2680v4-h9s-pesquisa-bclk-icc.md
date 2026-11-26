@@ -366,7 +366,7 @@ Strings do ICCMOD confirmam `IccEventFlagsGroup`, `IccWorkerThread`, `IccHeci1In
 | 0x200EF0D4 | validação de grupo/índice de registro; status 0x1018/0x1019 |
 | 0x200EF260 | leitura de registro auxiliar, decodificação grupo/índice; caso 0x7f especial |
 | 0x200EF7EC–0x200EF9E0 | validação e escrita auxiliar `sr` |
-| 0x200EFDE8 | escrita mascarada em aux 0x12301; `new=(old & ~mask) | (data & mask)` |
+| 0x200EFDE8 | escrita mascarada em aux 0x12301; `new=(old & ~mask) \| (data & mask)` |
 | 0x200EFE10 | rotina candidata a configuração; semântica pendente |
 | 0x200F0424 | tratamento de estrutura de mensagem e dispatch; compara 0x03/0x0C/0x0D/0x0E/0x0F |
 | 0x200F07B0 | handler de evento; rastrear |
