@@ -56,3 +56,15 @@ Fontes e logs permanecem em ~/backup-bios; não publicar dumps ou dados de provi
 ## Limites
 
 Nenhum aumento efetivo de BCLK ou turbo acima de 29x demonstrado. Nenhuma gravação SPI experimental nesta sessão. A documentação é uma consolidação de evidências fornecidas pelo operador; fontes locais e estado git do clone não foram auditados nesta atualização remota.
+
+## Atualização — ClockLab v0.11 e preparação da v0.12 (27/11/2026)
+
+**v0.11:** compilação GNU-EFI concluída sem diagnósticos de erro; SHA-256 fe7b12e32b6438e125fad6c6614114bb0c3598a91bc93c1a918cae284d44ae9d. Validador sintético e 5 testes Python aprovados. Execução física: preflight J retornou "MP READ-ONLY preflight FAILED status=Success; active tests blocked". H e U não executaram intervenções; R não dispunha de baseline MP. A condição interna exata da falha não foi registrada. Não atribuir o erro a um flag específico antes de observar os descritores brutos.
+
+**Referência temporal:** ACPI PM Timer, PMBASE=0401, ACPI_CNTL=80. Três amostras de TSC: 2394471, 2394466, 2394474 kHz. TSC/24 ~99769 kHz; ratio APERF/MPERF ~23,99x sob solicitação 24x. Estimativa indireta da referência; compatível com SSC, sem comprovar SSC ou medir fisicamente BCLK.
+
+**OC Mailbox:** domínio 0 resposta 0x221, domínio 2 resposta 0x21B, completion=0 em ambos. Decodificação utilizada pela ferramenta reporta ratio máximo 33/27, Ratio OC=0, Voltage Override=1, Voltage Offset=0. Consultas V/F retornaram dados 0 e completion=0 em ambos. Não interpretar zero como tensão física; suporte reportado não prova aceitação de escrita. Nenhuma sobretensão aplicada. HECI1 8D3A8086 presente, HECI2 ausente; FD2=001D. MKHI FWCAPS GET_RULE regra 0, host 0 dest 7: Send Success, HOST RP/WP 4→7, SPS 5→5, sem resposta em ~2 s. Não repetir sem alteração de hipótese.
+
+**v0.12:** compilação GNU-EFI concluída; SHA-256 4b06db7fd34efdab4887f014f1652270a572021c6aa01179da2abeb1248c53ec. Validador sintético MP12 e 9 testes Python aprovados. Execução UEFI pendente. Coleta Linux (395 linhas, 20.094 bytes) confirma 28 CPUs online, pares SMT 0/14 até 13/27; IDs físicos sysfs 0–6 e 8–14 (não contíguos). Não confundir índices lógicos com IDs físicos ou APIC. Clocksource TSC, alternativas HPET e ACPI PM. Temperatura pacote 34 °C, núcleos 30–31 °C; nenhum sensor de Vcore apareceu na coleta. A busca de candidatos por constantes em 12 módulos encontrou falsos positivos: CpuMpDxe 17C2 e PpmInitialize 17C1 são destinos de saltos; UncoreInitPeim 150/1301 aparecem em aritmética e comparação, não como consumidores de MSR/IntelSetup demonstrados. Não repetir busca por literais sem rastrear fluxo de dados e seções executáveis.
+
+Próxima ação: v0.12 J (descritores, identidade e callbacks passivos), I/H/U apenas se as respectivas pré-condições forem satisfeitas; R entre intervenções; coletar log completo. Em paralelo, analisar desassemblagens existentes de SpsDxe, SpsPei, MeDxePolicyInit, HeciInitDxe, IccPlatform, IccOverClocking, OcInit e CpuMpDxe. Nenhuma alteração física de BCLK ou tensão validada. Fontes das versões experimentais ainda não publicadas neste repositório.
