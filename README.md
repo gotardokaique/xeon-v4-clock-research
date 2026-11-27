@@ -8,7 +8,7 @@ Pesquisa independente de engenharia reversa para identificar, implementar e vali
 
 > **Fase atual: levantamento de requisitos e estudos técnicos (R&D).** O projeto ainda não disponibiliza uma solução funcional de overclock, firmware modificado ou ferramenta de gravação.
 >
-> **[ETAPA ATUAL — 11: Investigação ativa de BCLK, SSC, ICC e caminhos alternativos](docs/etapas/11-etapa-atual-investigacao-bclk-icc.md).** Consulte primeiro este documento: ele reúne os 12 tópicos da análise de continuidade e o plano operacional.
+> **[ETAPA ATUAL — 15: Produtores de configuração e parâmetros de turbo e ICC](docs/etapas/15-resolucao-parametros-produtores-configuracao.md).** A etapa 11 mantém a matriz de hipóteses.
 
 ## Objetivo
 
@@ -90,9 +90,13 @@ O documento principal permanece como referência da investigação de 26/11/2026
 | 08 | [Manifesto de hashes, cronologia e endereçamento](docs/etapas/08-evidencias-cronologia.md) |
 | 09 | [Caderno de comandos e resultados brutos](docs/etapas/09-caderno-comandos-resultados.md) |
 | 10 | [Mapa de funções, estruturas e condições de boot](docs/etapas/10-mapa-funcoes-estruturas.md) |
-| **11 — Atual** | [Investigação ativa: BCLK, SSC, ICC e caminhos alternativos](docs/etapas/11-etapa-atual-investigacao-bclk-icc.md) |
+| 11 | [Investigação ativa: BCLK, SSC, ICC e caminhos alternativos](docs/etapas/11-etapa-atual-investigacao-bclk-icc.md) |
+| 12 | [Inventário offline dos volumes SPS e caminhos de turbo](docs/etapas/12-inventario-offline-sps-turbo.md) |
+| 13 | [Serviços SPS, reconstrução de MFS e políticas de turbo](docs/etapas/13-resolucao-servicos-sps-politicas-turbo.md) |
+| 14 | [Backends ICC, RAPI e restrições de turbo](docs/etapas/14-backends-icc-rapi-restricoes-turbo.md) |
+| **15 — Atual** | [Produtores de configuração e parâmetros de turbo e ICC](docs/etapas/15-resolucao-parametros-produtores-configuracao.md) |
 
-**Leitura recomendada:** iniciar pela etapa 11, que contém o contexto e a estratégia atuais. Consultar etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
+**Leitura recomendada:** iniciar pela etapa 15 para os achados mais recentes e usar a etapa 11 para a matriz de hipóteses. Consultar etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
 
 ```text
 xeon-v4-clock-research/
@@ -112,7 +116,11 @@ xeon-v4-clock-research/
         ├── 08-evidencias-cronologia.md
         ├── 09-caderno-comandos-resultados.md
         ├── 10-mapa-funcoes-estruturas.md
-        └── 11-etapa-atual-investigacao-bclk-icc.md
+        ├── 11-etapa-atual-investigacao-bclk-icc.md
+        ├── 12-inventario-offline-sps-turbo.md
+        ├── 13-resolucao-servicos-sps-politicas-turbo.md
+        ├── 14-backends-icc-rapi-restricoes-turbo.md
+        └── 15-resolucao-parametros-produtores-configuracao.md
 ```
 
 ## Roadmap

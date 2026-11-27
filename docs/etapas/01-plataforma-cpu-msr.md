@@ -1,5 +1,7 @@
 # Etapa 01 — Plataforma, identificação da CPU e OC Mailbox
 
+> **Auditoria posterior.** O valor bruto transcrito para MSR 0xCE implica bits 28–30 iguais a 1. As anotações históricas de zero foram revistas na [etapa 14](14-backends-icc-rapi-restricoes-turbo.md). A saída original da leitura ainda precisa ser recuperada.
+
 > Fase: levantamento de requisitos e estudos. Registro derivado da [pesquisa consolidada](../xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md), de 26/11/2026. Não representa novos testes em hardware.
 
 Objetivo: estabelecer o limite real de frequência antes de investigar o gerador de clock.

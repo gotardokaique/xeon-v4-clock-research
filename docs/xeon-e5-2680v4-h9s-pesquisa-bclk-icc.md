@@ -1,5 +1,7 @@
 # Engenharia reversa do BCLK — Xeon E5-2680 v4 / QIYIDA X99-H9S
 
+> **Auditoria posterior.** O valor bruto transcrito para MSR 0xCE implica bits 28–30 iguais a 1. As anotações históricas de zero foram revistas na [etapa 14](etapas/14-backends-icc-rapi-restricoes-turbo.md). A saída original da leitura ainda precisa ser recuperada.
+
 **Data de consolidação:** 26/11/2026  
 **Estado:** pesquisa experimental; overclock acima de 2,9 GHz all-core ainda não demonstrado.  
 **Escopo:** firmware original, ICC/SPS, OC Mailbox, HECI, straps, configuração persistente e plano de ação reproduzível.

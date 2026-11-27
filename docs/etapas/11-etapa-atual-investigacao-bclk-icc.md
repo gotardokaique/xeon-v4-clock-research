@@ -1,5 +1,7 @@
 # Etapa 11 — Investigação ativa: BCLK, SSC, ICC e caminhos alternativos
 
+> **Auditoria posterior.** O valor bruto transcrito para MSR 0xCE implica bits 28–30 iguais a 1. As anotações históricas de zero foram revistas na [etapa 14](14-backends-icc-rapi-restricoes-turbo.md). A saída original da leitura ainda precisa ser recuperada.
+
 > **ETAPA ATUAL — levantamento de requisitos e estudos técnicos (R&D).**
 > Data de referência: 26/11/2026.
 > Este documento reúne os 12 tópicos da análise de continuidade, em um único contexto operacional. É o ponto de partida para a próxima sessão de pesquisa.
@@ -208,6 +210,7 @@ Estrutura proposta; ainda não implementada. Binários e dados brutos permanecem
 **Aceitação:** rastrear pelo menos um caminho desde a opção de frequência até um comando ou registro com semântica verificável. Não transplantar layout IntelSetup ou firmware de outra placa. Incompatibilidade identificada é um resultado útil.
 
 ## 6. Dados persistentes ICC no SPS — prioridade operacional
+A coleta offline local e a primeira comparação estrutural foram executadas. Consulte a [etapa 12](12-inventario-offline-sps-turbo.md) para os hashes, a geometria observada e os caminhos de turbo analisados.
 
 O datasheet C610/X99 descreve configuração de clock por firmware de gerenciamento e dados persistentes. Já extraímos código ICCMOD; falta interpretar a configuração utilizada pelo SPS original.
 
