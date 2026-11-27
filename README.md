@@ -8,7 +8,7 @@ Pesquisa independente de engenharia reversa para identificar, implementar e vali
 
 > **Fase atual: levantamento de requisitos e estudos técnicos (R&D).** O projeto ainda não disponibiliza uma solução funcional de overclock, firmware modificado ou ferramenta de gravação.
 >
-> **[ETAPA ATUAL — 15: Produtores de configuração e parâmetros de turbo e ICC](docs/etapas/15-resolucao-parametros-produtores-configuracao.md).** A etapa 11 mantém a matriz de hipóteses.
+> **[ETAPA ATUAL — 16: ClockLab, HECI funcional e limites turbo em UEFI](docs/etapas/16-clocklab-heci-turbo-runtime.md).** A etapa 11 mantém a matriz de hipóteses.
 
 ## Objetivo
 
@@ -46,6 +46,9 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 - [x] Teste do OC Mailbox: solicitação de ratio 30x rejeitada.
 - [x] Investigação HECI/MEI: dispositivo exposto, inicialização HBM malsucedida.
 - [x] Comparação de versões alternativas do OcInit.
+- [x] HECI bidirecional em UEFI: MKHI GET_FW_VERSION respondeu com sucesso.
+- [x] Sweep BSP em UEFI: 15 condições permaneceram em 28,99x; bit 63 de 1AC transitório.
+- [ ] Corrigir validação multicore da ClockLab v0.9 na v0.11 planejada.
 - [ ] Interpretar os dados persistentes do ICC no SPS 3.1.
 - [ ] Identificar ferramenta ou método compatível de análise dos perfis.
 - [ ] Confirmar topologia do clock e a atuação do MOD3 sobre o BCLK.
@@ -60,7 +63,7 @@ As frequências acima são projeções matemáticas, não resultados alcançados
 |---|---|---|
 | Perfis ICC persistentes no SPS original | Principal | Estrutura binária ainda não decodificada |
 | Gerador de clock e moduladores | Alta | Topologia física pendente |
-| HECI e protocolo ICC | Complementar | Comunicação não validada |
+| HECI e protocolo ICC | Complementar | HECI bidirecional validado por MKHI; ICC e HBM sem resposta |
 | OcInit e BCLK Strap | Complementar | Restrições e pré-condições em estudo |
 | Desbloqueio de multiplicador, turbo, PCU e microcode | Alta (estudos offline em paralelo) | Ratio 30x rejeitado pelo mecanismo testado; outras hipóteses permanecem abertas |
 
@@ -74,7 +77,7 @@ O arquivo [AGENTS.md](AGENTS.md), na raiz, reúne as instruções permanentes pa
 
 **[Engenharia reversa do BCLK — Xeon E5-2680 v4 / QIYIDA X99-H9S](docs/xeon-e5-2680v4-h9s-pesquisa-bclk-icc.md)**
 
-O documento principal permanece como referência da investigação de 26/11/2026. As etapas abaixo reorganizam essa base, acrescentam catálogos, fluxos, procedimentos de auditoria e requisitos para continuidade. Não representam novas execuções em hardware.
+O documento principal permanece como referência da investigação de 26/11/2026. As etapas abaixo reorganizam essa base, acrescentam catálogos, fluxos, procedimentos de auditoria e requisitos para continuidade. As etapas 01–15 incluem análise e registros históricos; a etapa 16 consolida novas execuções em hardware realizadas pelo operador.
 
 ### Caderno técnico por etapas
 
@@ -94,9 +97,10 @@ O documento principal permanece como referência da investigação de 26/11/2026
 | 12 | [Inventário offline dos volumes SPS e caminhos de turbo](docs/etapas/12-inventario-offline-sps-turbo.md) |
 | 13 | [Serviços SPS, reconstrução de MFS e políticas de turbo](docs/etapas/13-resolucao-servicos-sps-politicas-turbo.md) |
 | 14 | [Backends ICC, RAPI e restrições de turbo](docs/etapas/14-backends-icc-rapi-restricoes-turbo.md) |
-| **15 — Atual** | [Produtores de configuração e parâmetros de turbo e ICC](docs/etapas/15-resolucao-parametros-produtores-configuracao.md) |
+| 15 | [Produtores de configuração e parâmetros de turbo e ICC](docs/etapas/15-resolucao-parametros-produtores-configuracao.md) |
+| **16 — Atual** | [ClockLab, HECI funcional e limites turbo em UEFI](docs/etapas/16-clocklab-heci-turbo-runtime.md) |
 
-**Leitura recomendada:** iniciar pela etapa 15 para os achados mais recentes e usar a etapa 11 para a matriz de hipóteses. Consultar etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
+**Leitura recomendada:** iniciar pela etapa 16 para os achados mais recentes e usar a etapa 11 para a matriz de hipóteses. Consultar etapas 01 a 06 para entender as evidências, etapa 07 para executar o plano de pesquisa, etapa 08 para localizar artefatos e conferir a rastreabilidade; etapas 09 e 10 para revisar os comandos históricos, valores brutos, funções privadas e estruturas de baixo nível.
 
 ```text
 xeon-v4-clock-research/
@@ -120,7 +124,8 @@ xeon-v4-clock-research/
         ├── 12-inventario-offline-sps-turbo.md
         ├── 13-resolucao-servicos-sps-politicas-turbo.md
         ├── 14-backends-icc-rapi-restricoes-turbo.md
-        └── 15-resolucao-parametros-produtores-configuracao.md
+        ├── 15-resolucao-parametros-produtores-configuracao.md
+        └── 16-clocklab-heci-turbo-runtime.md
 ```
 
 ## Roadmap
