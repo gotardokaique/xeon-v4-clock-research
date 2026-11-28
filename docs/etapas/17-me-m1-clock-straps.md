@@ -59,3 +59,77 @@ Próximo passo executável offline: extrair e identificar módulos B1/C612RD24 l
 - `python3 scripts/icc_descriptor.py --image h9s=../x99-h9s-original.bin --image b1='../referencia-winraid-260614/extraido/Step 1, B1 or B2 BIOS/D1_Mx_B1_260614.bin' --image c612rd24=../overclock-mod/machinist-x99z-c612rd24.rom` — lista de pares brutos; não interpreta seletores.
 - `python3 -m unittest discover -s tests`: 34 testes passaram, incluindo fixtures sintéticas de FPT válido, entrada sem offset, limites, cabeçalho desconhecido e contagem excessiva.
 - ME Analyzer exigiu terminal interativo no ambiente local; execução não interativa falhou em colorama e não foi usada como resultado. Python 3.14.4; objdump GNU 2.46; 7-Zip 26.00. Originais preservados.
+
+## 17.6 Continuação — compatibilidade M1 e rotina 61E
+
+Continuação solicitada após a publicação da etapa 17. Análise offline, sem repetir os testes de EOP, MSRs ou ICC. **Correção:** a tabela em 17.3 dizia que o consumidor de Adjust PLL não estava resolvido; os caminhos PEI abaixo foram identificados estaticamente. Isso não comprova que sejam alcançados na H9S nem que mudem o BCLK. A denominação anterior “sincronização” para 647E é uma descrição funcional parcial: a operação efetiva usa OR e não substitui necessariamente o campo.
+
+### Módulos PEI/DXE — H9S, B1 e C612RD24
+
+B1 foi extraída offline com `uefiextract` já instalado, UEFITool NE alpha 73; resultados em `~/backup-bios/referencia-winraid-260614/analise-b1/`, sem executar os módulos. A extração reportou JEDEC A12818/1C4018 desconhecidos e aviso de parsing ACM; isso limita a conclusão sobre a análise integral da imagem. C612RD24 e H9S usam extrações já existentes. Comparação de arquivos PE32/TE e DEPEX; identidade de DEPEX significa identidade de expressão binária, não de disponibilidade real do protocolo. “Ausente” significa não encontrado por nome ou GUID nos relatórios, não prova de inexistência de função equivalente sob outro GUID.
+
+| Módulo / GUID | Comparação estática |
+|---|---|
+| HeciInit `4862aff3-667c-5458-b274-a1c62df8ba80` | DEPEX 18 bytes igual nas três; PE diferente |
+| HeciInitDxe `55e76644-78a5-4a82-a900-7126a5798892` | DEPEX 36 bytes igual nas três; PE diferente |
+| MeDxePolicyInit `24a44caf-0bf2-4514-90c4-c794b3e778f5` | DEPEX 72 bytes igual nas três; PE diferente |
+| IccPlatform `14257b56-bda2-4faf-8e4f-c885df75583c` | DEPEX H9S=B1 108 bytes; C612RD24 72 bytes |
+| IccOverClocking `5bba83e5-f027-4ca7-bfd0-16358cc9e123` | PE e DEPEX idênticos nas três; DEPEX contém protocolo HECI `cfb33810-6e87-4284-b203-a66abe07f6e8` |
+| SpsPei `44640c32-33d7-4fb0-b1f9-6c7b232e994d` / SpsDxe `e8f6a75c-3cda-4b00-9837-8ca2a1f34eac` | presentes na H9S, ausentes por nome/GUID em B1 e C612RD24 |
+| OcInit `6540f933-425f-464b-b4ad-b93a6ed0a8f5` | DEPEX H9S 18 bytes; B1=C612RD24 54 bytes; PE B1 e C612RD24 diferem no ImageBase e em 16 fixups HIGHLOW, mas coincidem após normalização de relocação; H9S é distinto |
+
+DEPEX OcInit de B1/C612 inclui adicionalmente `2ab86ef5-ecb5-4134-b556-3854ca1fe1b4` e `f38d1338-af7a-4fb6-91db-1a9c2183570d`; funções dessas interfaces ainda não identificadas. Na H9S SpsDxe usa MKHI FF/0C para EOP no destino 7 sob gate de IntelSetup; IccPlatform exige modo 0 e status com nibble baixo 0 antes do comando 03 ao destino 8, conforme etapa 16. Em B1, IccPlatform RVA 9A8–A72 tem os mesmos gates estruturais de modo e status e envia comando 03, versão 30000h, host 0, destino 8; o modo efetivo e a resposta sob M1 não foram medidos. Compartilhamento de GUID ou código ICC não demonstra suporte operacional: o ambiente HECI, produtor do protocolo e política de firmware também importam.
+
+| Combinação | Evidência e condição ainda aberta |
+|---|---|
+| H9S + SPS original | controle físico existente: MKHI versão respondeu; ICC 06 não respondeu mesmo no ensaio EOP=0. Caminhos SPS presentes. |
+| H9S + M1 | hipótese de alto valor informacional, **não demonstrada compatível**: BIOS mantém SpsPei/SpsDxe, dependências e inicialização de plataforma SPS; não foi demonstrado que sejam incompatíveis de forma inevitável nem que funcionem com ME 9.1. Os 27 pares ICC e soft straps originais permanecem. |
+| B1 + M1 | combinação recomendada no relato de terceiros; B1 não possui os módulos SPS identificados e usa OcInit da família C612RD24. Não foi validada nesta placa/revisão ou neste CPU. IIO e Super I/O continuam relevantes. |
+
+**IIO e Super I/O:** IFR das duas BIOS: IOU2 offset 539, opção x4x4 valor 0, default em ambas; IOU1 offset 535, Auto FF, default em ambas; IOU0 offset 531, H9S marca x4x4x4x4 valor 0 como default, B1 não marca default na expressão examinada. O changelog B1 informa x4x4; x4x4x4x4; Auto, sem provar NVRAM real ou disposição física. As três contêm `NCT5532DPeiInit` GUID `9029f23e-e1ee-40d1-9382-36dd61a63eaa`, com PE diferentes. O nome não identifica o chip físico nem garante mapeamento de sensores, ventoinhas e pinos.
+
+**EFFS e descriptor:** EFFS M1, intervalo relativo ME `[0x3000,0x43000)`, contém 72332 bytes diferentes de FF; foram encontradas literalmente uma ocorrência cada de NVCL/NVCP e três de Profile, nenhuma de ICC/BCLK. As três ocorrências pertencem a strings UserProfile, sem associação demonstrada a clock. Isso não interpreta arquivos, integridade ou perfil de clock. Fonte primária [Intel C610/X99, §§4.5–4.6](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/x99-chipset-pch-datasheet.pdf): firmware SPS/ME controla registradores de clock e PCHSTRP17 bits 7,1,0 selecionam o modo; o texto examinado não fornece aqui polaridade suficiente para determinar topologia apenas pelos bits. Usando FLMAP1 e a convenção de FPSBA do [ifdtool do coreboot](https://github.com/coreboot/coreboot/blob/main/util/ifdtool/ifdtool.c), as três imagens têm 21 DWORDs a partir de SPI 0x100 e PCHSTRP17 em SPI 0x144 = `00000002` (bits 7/1/0 = 0/1/0). PCHSTRP20 em SPI 0x150: H9S `00070000`, B1/C612RD24 `00380000`; bit 27 é zero em todas. Valores brutos não comprovam a topologia montada. Os 27 pares ICC H9S ocupam SPI [210h,2E8h); os seletores têm byte baixo E9/EA/EB e byte [23:16] 80/82/83/C0/C1, sem significado atribuído. Por exemplo SPI 210h tem selector 008340EB e valor 000805A6. Não foram decodificados até um registro com efeito físico; não assumir que a M1 os consuma da mesma forma nem os remover.
+
+### OcInit H9S FFDC647E — fluxo e registradores
+
+Endereços FFDCxxxx são VMA PE32, não offsets SPI. A entrada FFDC4A84 chama 4A9F; o único chamador direto identificado de 647E é 4E9A. O acesso depende de HOB plataforma byte +5E em 13/14/15, IntelSetup[163F] diferente de zero, consulta de capacidade OC Mailbox opcode 01 cujo resultado bit 8 alimenta RatioOcSupported, e interface PPI `f38d1338-af7a-4fb6-91db-1a9c2183570d` cujo método +4 retorna AL=0 antes da chamada. A identidade desse PPI não está resolvida. A resposta runtime histórica 0x221 tem bit 8 zero, mas não é medição da consulta em PEI. O HOB de identificação 07 da H9S é candidato com limite PHIT inconsistente, conforme etapa 16; não provar que este gate tenha sido avaliado assim durante PEI.
+
+```mermaid
+flowchart TD
+ A["Entrada PEI 4A84 → 4A9F"] --> B{"HOB 13/14/15, Setup 163F e capacidade bit 8?"}
+ B -- não --> Z["Retorno; acesso 61E não demonstrado"]
+ B -- sim --> C["Lê 61E e executa ramos de política/PLL"]
+ C --> D{"PPI f38d... método +4 retorna AL=0?"}
+ D -- não --> Z
+ D -- sim --> E["647E: lê 61E e registradores HECI"]
+ E --> F{"ID HECI = FFFFFFFF ou GMES2[2:0] = 61E[1:0]?"}
+ F -- sim --> G["Retorno; sem handshake"]
+ F -- não --> H["WRMSR 61E = valor anterior OR GMES2[2:0] OR 8"]
+ H --> I["Se MEM_SR=0, limpa bit 23 de GEN_PMCON_2; se S3, altera CMOS"]
+ I --> J["Localiza Stall PPI; escreve H_GS=60000001"]
+ J --> K{"HFS[31:28] = 6 antes de esgotar 100000 tentativas?"}
+ K -- sim --> L["Retorno do caminho"]
+ K -- não --> M["Timeout 80000012"]
+```
+
+| Espaço/endereço | Operação observada e limite |
+|---|---|
+| MSR `61E` | 4B96 e 6497 leem; 6541–55A compara [1:0] a GMES2[2:0]. Se divergir, 6560–658B escreve `antigo OR (GMES2 & 7) OR 8`; bit 2 de origem pode ser setado e [1:0] antigos não são limpos. Bit 2 do MSR é extraído em 64A3–64BB, sem uso subsequente localizado. Ex.: 61E=2, GMES2=1 produz operando 11 decimal, low2=3, não 1. Sem documentação de efeito do WRMSR ou leitura válida PEI. |
+| ECAM relativo `B0060` | BDF 00:16.0 offset 60h, GMES2, status geral preenchido pelo ME; [2:0] comparados no código. [Intel §24.1.1.20](https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/x99-chipset-pch-datasheet.pdf) não define aqui esses bits como frequência ou strap. |
+| ECAM relativo `B0000`, `B0040`, `B0048`, `B0064`–`B006C` | IDs/status lidos em 64BE–651C; FFFFFFFF no ID impede a sequência posterior, mas a leitura MSR já ocorreu. `B0040` é HFS e [31:28] é usado no ACK. |
+| ECAM relativo `B004C` | H_GS em 00:16.0+4C: firmware escreve `60000001` em 6606–6613; comando específico não decodificado. |
+| ECAM relativo `F80A0` | 00:1f.0+A0, GEN_PMCON_2: testa bit 21 MEM_SR; se zero, escreve DWORD lido com bit 23 DRAM Initialization limpo. A escrita em DWORD pode afetar campos RW1C; não reproduzir manualmente. Intel §§12.9.1.1–2. |
+| CMOS estendido 98h | no boot mode S3 (11h), helper escreve 1 via portas 72h/73h e atualiza checksum; não é leitura passiva. |
+| H_GS/HFS e Stall PPI | GUID `1f4c6f90-b06b-48d8-a201-bae5f1cd7d56`, [Stall PPI EDK II](https://github.com/tianocore/edk2/blob/master/MdePkg/Include/Ppi/Stall.h): espera de 1 µs por iteração, até 100000 iterações; contador é testado antes do ACK na última, portanto ACK na tentativa final ainda expira. Não foi observada validação de erro de LocatePpi antes de usar a interface. |
+
+A tabela local 4AAD–4AB9 associa índice 61E[1:0] aos inteiros 100/125/166/250; a política HOB pode sobrescrever o valor em 4C78–4CA1. Isso é tabela interna, não medição de clock. A comparação de GMES2 com 61E e o handshake apoiam participação no fluxo de estado de strap, mas não demonstram que o código selecione ou aplique clock novo. O OcInit C612RD24 não mostra acesso literal 61E nos disassemblies disponíveis; OcInit B1 é equivalente após relocação ao C612RD24. A busca dos ASM locais por `push 0x61e` e `mov ecx,0x61e` encontrou apenas três pontos no OcInit H9S; não cobre endereços calculados ou módulos não desassemblados.
+
+**Adjust PLL e caminho alternativo:** base IntelSetup é EBP−1894h. FFDC4CA2 lê DWORD +17C2; se não zero e CPUID>>4=406F, +17C6 seleciona sinal, e FFDC4CC5–4CE8 chama o helper FFDC677A com pares comando/dados 2/50001h, 4001h/trim assinado e 3/0, respectivamente. Esse ramo não testa +17C1. Para valores de tabela 166 e 125, +17C1=1 habilita ramos 4D04–4D15 e 4D9E–4DAB, que no modelo 406F usam 2/50001h, 4001h/0, 3/0. FFDC677A deriva bus de MSR300[15:8] e usa ECAM relativo bus:D31:F0 offsets 40/44; não confundir com PCH no bus 0. Semântica oficial dos comandos, conclusão e efeito físico não demonstrados; há polling sem timeout observado no helper. FFDC4CF0 testa +17C7, IFR de TJ-Max offset, e caminho subsequente é térmico: não alterar. Nenhum caminho de programação **antes** da inicialização definitiva do PCU foi demonstrado.
+
+### Experimentos candidatos e validação offline
+
+1. **Diagnóstico passivo primeiro:** uma eventual sonda UEFI somente leitura poderia registrar identidade, GMES2/HFS e gates publicados de plataforma no mesmo caminho de boot, sem ler 61E caso sua leitura não seja demonstrada segura e sem executar os comandos anteriores. Isso exige autorização específica para acesso ao hardware/reboot e não prova o estado anterior em PEI. Não repetir EOP ou ICC.
+2. **H9S + M1:** candidato de comparação isolada, ainda não tecnicamente justificado para flash: fonte e compatibilidade das estruturas persistentes e caminhos de boot SPS permanecem sem resolução. Antes de construir imagem, identificar produtores/protocolos de PEI/DXE e confirmar compatibilidade do serviço com os 27 pares e a placa. Falha em POST não refuta isoladamente ICC.
+3. **61E/PLL:** o modelo de código identifica o caminho, não fornece um comando de teste seguro. Nenhuma proposta de forçar PPI, HOB, 61E, mailbox, limites ou proteções é sustentada pelas evidências atuais.
+
+`scripts/compare_pe_reloc.py` normaliza ImageBase e relocations HIGHLOW em memória, recusando entradas malformadas; a igualdade é binária após normalização, não valida comportamento. `scripts/modelo_strap.py` simula apenas a decisão e o operando observado, sem acesso a hardware. `scripts/verifica_candidato_me.py` valida hashes esperados, limites ME/BIOS e igualdade integral das áreas fora da região ME e do conteúdo ME com a entrada; não cria imagem, não interpreta assinaturas nem garante boot ou compatibilidade. Uma composição foi validada **somente em memória**, sem salvar firmware. Testes sintéticos cobrem OR e seus bits, MEI ausente, erro de hash, alterações indevidas, tamanhos e regiões sobrepostas. Logs/artefatos brutos permanecem fora do Git.
